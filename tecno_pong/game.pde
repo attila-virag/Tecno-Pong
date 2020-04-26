@@ -42,19 +42,17 @@ final class Logger {
 final class Game 
 { 
 
-  private Player player1;
-  private Player player2;
+  public Player player1;
+  public Player player2;
   private ArrayList<GameObject> allGameObjects;
 
   private int player1Score;
   private int player2Score;
 
-  private int buttonCheckInterval; // in ms - this adds a partial delay effect to user controls, should be between 0-300ms
-  private int lastControlUpdate;
-
   private Logger logger;
   private void LogMessage(String msg) {
     String message =  "Game"+">>" + msg;
+    logger.LogMessage(message);
   }
 
   private int gameState;
@@ -63,7 +61,6 @@ final class Game
 
     this.logger = new Logger(1);
     LogMessage("Game Created");
-    this.lastControlUpdate = millis();
 
     SetState(GameState.START_SCREEN);
   }
@@ -74,14 +71,19 @@ final class Game
     SetState(GameState.START_SCREEN);
   }
   // this method transitions to gameplay state
-  public void SartGame() {
+  public void StartGame() {
     SetState(GameState.PLAYING);
     allGameObjects = new ArrayList();
     player1Score = 0;
     player2Score = 0;
+    
+    
     // create the players
     // max speed
-    //this.player1 = new Player(20, 100,
+    this.player1 = new Player(this.logger,60, 100,0,0, 0,15,"Player1",1);
+    allGameObjects.add(this.player1);
+    this.player2 = new Player(this.logger,740, 100,0,0, 0,15,"Player2",2);
+    allGameObjects.add(this.player2);
   }
 
   // paused
@@ -117,15 +119,15 @@ final class Game
 
     switch(GetGameState()) {
       case (GameState.START_SCREEN) : 
-      drawStartScreen();
+      drawStartScreen(); break;
       case (GameState.PLAYING) : 
-      drawPlayScreen();
+      drawPlayScreen(); break;
       case (GameState.PAUSE) : 
-      drawPauseScreen();
+      drawPauseScreen(); break;
       case (GameState.END_SCREEN) : 
-      drawEndScreen();
+      drawEndScreen(); break;
     default : 
-      println("Error: invalid gamestate");
+      LogMessage("Error: invalid gamestate");
     }
   }
 
@@ -153,6 +155,10 @@ final class Game
   }
 
   private void drawPlayScreen() {
+    background(0,0,0);
+    for (GameObject obj : allGameObjects) {
+      obj.drawObject();
+    }
   }
 
   private void drawPauseScreen() {
@@ -185,55 +191,47 @@ final class Game
 
   private void updateStartScreen() {
     // for now just check if we pressend
-    checkForPlayerControls();
+   // checkForPlayerControls();
   }
 
   private void updatePlayState() {
     // delete any object marked for delete first
     
     // update position of all objects
+    for(GameObject obj : allGameObjects) {
+     // update position of all objects
+     obj.UpdatePosition();
+     
+     //check for collisions
     
-    // check for collisions
+    // check boundary collisions
+    // TODO there is a bug in this as objects can still "push through"
+    if(obj.TopWallCollision() || obj.BottomWallCollision()) {
+      if(obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) { 
+        obj.vY=0;  // if paddle
+      }
+      // for ball we need to reflect vY
+    }
+    
+    // check for object collisions
+    
+    // update all other object states
+      obj.UpdateObjectState();
+    }
+
+    
+    // update all other object states
+    for(GameObject obj : allGameObjects) {
+     obj.UpdateObjectState();
+    }
     
     // check for any user inputs
   }
 
   private void updatePauseScreen() {
   }
-
+ //<>//
   private void updateEndScreen() {
-  }
-
-  private void checkForPlayerControls() {
-    if (millis() - lastControlUpdate > buttonCheckInterval) {
-      return;
-    } else {
-      // for different gamestates we check for different controls
-      switch(GetGameState()) {
-        case (GameState.START_SCREEN) : 
-        updatePlayerInputStartScreen();
-        case (GameState.PLAYING) : 
-        updatePlayerGameInput();
-        case (GameState.PAUSE) : 
-        updatePlayerInputPauseScreen();
-        case (GameState.END_SCREEN) : 
-        updatePlayerInputEndScreen();
-      }
-    }
-  }
-  private void updatePlayerInputStartScreen () {
-    
-  }
+  } //<>//
   
-  private void updatePlayerGameInput() {
-    
-  }
-  
-  private void updatePlayerInputPauseScreen() {
-    
-  }
-  
-  private void updatePlayerInputEndScreen() {
-    
-  }
 }

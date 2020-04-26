@@ -12,14 +12,20 @@ public abstract class GameObject {
   protected int maxSpeedX, maxSpeedY; // magnitude, max speed an object can have
 
   protected String objName;
+  public int objectType;
   boolean markForDelete;
+
+  protected int updateInterval = 40; // in ms - this adds a partial delay effect to user controls, should be between 0-300ms
+  protected int lastControlTime;
+  protected boolean allowControl;
 
   protected Logger logger;
   private void LogMessage(String msg) {
     String message =  objName+">>" + msg;
+    logger.LogMessage(message);
   }
 
-  public GameObject(Logger logger, int x, int y, int vX, int vY, int maxSpeedX, int maxSpeedY, String name) {
+  public GameObject(Logger logger, int x, int y, int vX, int vY, int maxSpeedX, int maxSpeedY, String name, int objectType) {
     this.logger = logger;
     this.x = x;
     this.y = y;
@@ -28,10 +34,26 @@ public abstract class GameObject {
     this.maxSpeedX = maxSpeedX;
     this.maxSpeedY = maxSpeedY;
     this.objName = name + ", ID: " + nf(++objectNumber, 5);
+    this.objectType = objectType;
     this.markForDelete = false;
+    this.lastControlTime = millis();
+    this.allowControl = true;
     LogMessage("Object Created");
   }
+  
+  public void drawObject() {
+    return;
+  }
 
+  public void UpdateObjectState() {
+    return;
+    // check if control allowed timer is up, etc implement in child classes
+  }
+  
+  public void UpdatePosition() {
+   x = x+vX;
+   y = y+vY;
+  }
 
   // collision detector for all objects
   boolean DetectObjectCollision(GameObject other) {
@@ -69,9 +91,9 @@ public abstract class GameObject {
     }
     return false;
   }
-  
+
   boolean BottomWallCollision() {
-    if (y1 > GameBoundaries.PLAY_BOTTOM) {
+    if (y2 > GameBoundaries.PLAY_BOTTOM) {
       LogMessage("Collision with Bottom Boundary");
       return true;
     }
@@ -86,6 +108,58 @@ public abstract class GameObject {
     if (y < GameBoundaries.PLAY_TOP-50 || y > GameBoundaries.PLAY_BOTTOM +50) {
       LogMessage("Off Screen Y axis, mark for delete ");
       return true;
+    }
+    return false;
+  }
+
+  public boolean AllowControl() {
+    return allowControl;
+  }
+
+  public void LockControl() {
+    allowControl = false;
+  }
+
+  public void ResetAllowControl() {
+    allowControl = true;
+  }
+
+  public void Increase_vX() {
+    if (allowControl) { //<>//
+      if (abs(vX) < maxSpeedX) {
+        vX++;
+        lastControlTime = millis();
+        allowControl = false;
+      }
+    }
+  }
+
+  public void Decrease_vX() {
+    if (allowControl) {
+      if (abs(vX) < maxSpeedX) {
+        vX--;
+        lastControlTime = millis();
+        allowControl = false;
+      }
+    }
+  }
+
+  public void Increase_vY() {
+    if (allowControl) {
+      if (abs(vY) < maxSpeedY) {
+        vY++;
+        lastControlTime = millis();
+        allowControl = false;
+      }
+    }
+  }
+  public void Decrease_vY() {
+    if (allowControl) {
+      if (abs(vY) < maxSpeedY) {
+        vY--;
+        lastControlTime = millis();
+        allowControl = false;
+      }
     }
   }
 }

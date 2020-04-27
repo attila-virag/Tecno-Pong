@@ -1,4 +1,4 @@
-static int objectNumber = 0;
+static int objectNumber = 0; //<>// //<>//
 
 // gamestate
 static abstract class GameState {
@@ -76,13 +76,13 @@ final class Game
     allGameObjects = new ArrayList();
     player1Score = 0;
     player2Score = 0;
-    
-    
+
+
     // create the players
     // max speed
-    this.player1 = new Player(this.logger,60, 100,0,0, 0,15,"Player1",1);
+    this.player1 = new Player(this.logger, 60, 100, 0, 0, 0, 15, "Player1", 1);
     allGameObjects.add(this.player1);
-    this.player2 = new Player(this.logger,740, 100,0,0, 0,15,"Player2",2);
+    this.player2 = new Player(this.logger, 740, 100, 0, 0, 0, 15, "Player2", 2);
     allGameObjects.add(this.player2);
   }
 
@@ -119,13 +119,17 @@ final class Game
 
     switch(GetGameState()) {
       case (GameState.START_SCREEN) : 
-      drawStartScreen(); break;
+      drawStartScreen(); 
+      break;
       case (GameState.PLAYING) : 
-      drawPlayScreen(); break;
+      drawPlayScreen(); 
+      break;
       case (GameState.PAUSE) : 
-      drawPauseScreen(); break;
+      drawPauseScreen(); 
+      break;
       case (GameState.END_SCREEN) : 
-      drawEndScreen(); break;
+      drawEndScreen(); 
+      break;
     default : 
       LogMessage("Error: invalid gamestate");
     }
@@ -155,7 +159,7 @@ final class Game
   }
 
   private void drawPlayScreen() {
-    background(0,0,0);
+    background(0, 0, 0);
     for (GameObject obj : allGameObjects) {
       obj.drawObject();
     }
@@ -177,10 +181,10 @@ final class Game
       updatePlayState(); 
       break;
       case (GameState.PAUSE) : 
-      updatePauseScreen(); 
+      //updatePauseScreen(); 
       break;
       case (GameState.END_SCREEN) : 
-      updateEndScreen(); 
+      //updateEndScreen(); 
       break;
     default : 
       println("Error: invalid gamestate");
@@ -191,47 +195,49 @@ final class Game
 
   private void updateStartScreen() {
     // for now just check if we pressend
-   // checkForPlayerControls();
+    // checkForPlayerControls();
   }
 
   private void updatePlayState() {
     // delete any object marked for delete first
-    
+
     // update position of all objects
-    for(GameObject obj : allGameObjects) {
-     // update position of all objects
-     obj.UpdatePosition();
-     
-     //check for collisions
-    
-    // check boundary collisions
-    // TODO there is a bug in this as objects can still "push through"
-    if(obj.TopWallCollision() || obj.BottomWallCollision()) {
-      if(obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) { 
-        obj.vY=0;  // if paddle
+    for (GameObject obj : allGameObjects) {
+      // update position of all objects
+      obj.UpdatePosition();
+
+      //check for collisions
+
+      // check boundary collisions
+      if (obj.TopWallCollision()) {
+        if (obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) {
+          obj.TopBoundingBoxCollision(GameBoundaries.PLAY_TOP);
+          obj.vY = +1;
+        }
       }
+      if (obj.BottomWallCollision()) {
+        if (obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) {
+          obj.BottomBoundingBoxCollision(GameBoundaries.PLAY_BOTTOM);
+          obj.vY = -1; //<>//
+        }
+      }
+
       // for ball we need to reflect vY
     }
-    
+
     // check for object collisions
-    
-    // update all other object states
-      obj.UpdateObjectState();
-    }
 
-    
     // update all other object states
-    for(GameObject obj : allGameObjects) {
-     obj.UpdateObjectState();
-    }
-    
-    // check for any user inputs
-  }
-
-  private void updatePauseScreen() {
-  }
- //<>//
-  private void updateEndScreen() {
-  } //<>//
+    //obj.UpdateObjectState();
   
+
+
+  // update all other object states
+  for (GameObject obj : allGameObjects) {
+    obj.UpdateObjectState();
+  }
+
+  // check for any user inputs
+}
+
 }

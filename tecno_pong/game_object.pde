@@ -41,14 +41,15 @@ public abstract class GameObject {
     LogMessage("Object Created");
   }
   
-  public void drawObject() {
-    return;
-  }
+  public abstract void drawObject();
 
-  public void UpdateObjectState() {
-    return;
-    // check if control allowed timer is up, etc implement in child classes
+  public abstract void UpdateObjectState();
+  
+  
+  public int GetObjectYPosition() {
+   return y; 
   }
+  
   
   public void UpdatePosition() {
    x = x+vX;
@@ -68,9 +69,19 @@ public abstract class GameObject {
     return false;
   }
 
+  // checks if we are in a collision state with respect to point X from the left, resest objetc x if needed
+  public abstract void LeftBoundingBoxCollision(int X); 
+
+  public abstract void RightBoundingBoxCollision(int X);
+  
+  public abstract void TopBoundingBoxCollision(int Y);
+  
+  public abstract void BottomBoundingBoxCollision(int Y);
+  
   boolean LeftWallCollision() {
     if (x1 < GameBoundaries.PLAY_LEFT) {
       LogMessage("Collision with Left Boundary");
+      // we will also move the object back to the boundary
       return true;
     }
     return false;

@@ -24,7 +24,7 @@ void keyPressed() {
   switch(game.GetGameState()) {
     case (GameState.START_SCREEN) : 
     {
-      if (keyCode == 10) {
+      if (keyCode == 10) { // enter button
         game.StartGame();
       }
 
@@ -34,7 +34,7 @@ void keyPressed() {
     {
       // player 1 controls
       if (key == 'w' || key == 'W') { 
-        game.player1.Decrease_vY(); //<>//
+        game.player1.Decrease_vY();
       }
       if (key == 's' || key == 'S') { 
         game.player1.Increase_vY();

@@ -7,6 +7,7 @@ final class Player extends GameObject {
   final int w = 20; // the width of the paddle
   private int l = 200; // the lenght of the paddle, can change during a game
   private int strokeW = 5;
+  
 
   public Player(Logger logger, int x, int y, int vX, int vY, int maxSpeedX, int maxSpeedY, String name, int objectType) {
    super(logger,x,y,vX,vY, maxSpeedX,maxSpeedY, name, objectType);
@@ -29,8 +30,36 @@ final class Player extends GameObject {
     }
     // update bounding rect
     x1 = x;
-    y1 = y-10;
-    x2 = x+w;
-    y2 = y+l+100;
+   x2 = x+w;
+   y1 = y;
+   y2 = y+l;
+  }
+  
+  public void LeftBoundingBoxCollision(int X) {
+    if(X < x1) {
+     // recet center point to be outside of colision surface
+     x = x1+1;
+    }
+  }
+
+  public  void RightBoundingBoxCollision(int X){
+    if(X > x2) {
+     // recet center point to be outside of colision surface
+     x = x2-w-1;
+    }
+  }
+  
+  public void TopBoundingBoxCollision(int Y){
+    if(Y < y1) {
+     // recet center point to be outside of colision surface
+     x = y1+1;
+    }
+  }
+  
+  public void BottomBoundingBoxCollision(int Y) {
+    if(Y > y2) {
+     // recet center point to be outside of colision surface
+     y= y2-l-1;
+    }
   }
 }

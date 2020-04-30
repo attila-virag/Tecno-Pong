@@ -10,7 +10,7 @@ final class Player extends GameObject {
   
 
   public Player(Logger logger, int x, int y, int vX, int vY, int maxSpeedX, int maxSpeedY, String name, int objectType) {
-   super(logger,x,y,vX,vY, maxSpeedX,maxSpeedY, name, objectType);
+   super(logger,x,y,vX,vY, maxSpeedX,maxSpeedY, name, objectType); //<>//
   }
 
   public void drawObject() {
@@ -35,31 +35,46 @@ final class Player extends GameObject {
    y2 = y+l;
   }
   
-  public void LeftBoundingBoxCollision(int X) {
-    if(X < x1) {
-     // recet center point to be outside of colision surface
-     x = x1+1;
+  public boolean LeftBoundingBoxCollision(int X) {
+    if(X >= x1) {
+     // reset center point to be outside of colision surface
+     x = X+1;
+     return true;
     }
+    return false;
   }
 
-  public  void RightBoundingBoxCollision(int X){
-    if(X > x2) {
-     // recet center point to be outside of colision surface
-     x = x2-w-1;
+  public boolean RightBoundingBoxCollision(int X){
+    if(X <= x2) {
+     // reset center point to be outside of colision surface
+     x = X-w-1;
+     return true;
     }
+    return false;
   }
   
-  public void TopBoundingBoxCollision(int Y){
-    if(Y < y1) {
-     // recet center point to be outside of colision surface
-     x = y1+1;
+  public boolean TopBoundingBoxCollision(int Y){
+    if(Y >= y1) {
+     // reset center point to be outside of colision surface
+     y = Y+1;
+     return true;
     }
+    return false;
   }
   
-  public void BottomBoundingBoxCollision(int Y) {
-    if(Y > y2) {
+  public boolean BottomBoundingBoxCollision(int Y) {
+    if(Y <= y2) {
      // recet center point to be outside of colision surface
-     y= y2-l-1;
+     y= Y-l-1;
+     return true;
     }
+    return false;
+  }
+  
+  public boolean IsPointInsideBoundingBox(int X, int Y) {
+    if(X > x1 && X < x2 && Y > y1 && Y < y2) {
+     return true; 
+    }
+    return false;
   }
 }

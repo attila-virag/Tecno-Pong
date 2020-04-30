@@ -1,4 +1,4 @@
-static int objectNumber = 0; //<>// //<>//
+static int objectNumber = 0; //<>// //<>// //<>// //<>//
 
 // gamestate
 static abstract class GameState {
@@ -49,6 +49,8 @@ final class Game
   private int player1Score;
   private int player2Score;
 
+  private int gameTime; // in seconds
+
   private Logger logger;
   private void LogMessage(String msg) {
     String message =  "Game"+">>" + msg;
@@ -77,12 +79,14 @@ final class Game
     player1Score = 0;
     player2Score = 0;
 
+    // set game time zero
+    this.gameTime = 0;
 
     // create the players
     // max speed
-    this.player1 = new Player(this.logger, 60, 100, 0, 0, 0, 15, "Player1", 1);
+    this.player1 = new Player(this.logger, 60, 300, 0, 0, 0, 15, "Player1", 1);
     allGameObjects.add(this.player1);
-    this.player2 = new Player(this.logger, 740, 100, 0, 0, 0, 15, "Player2", 2);
+    this.player2 = new Player(this.logger, 740, 300, 0, 0, 0, 15, "Player2", 2);
     allGameObjects.add(this.player2);
   }
 
@@ -158,8 +162,44 @@ final class Game
     ellipse(380, 100, 60, 60);
   }
 
+  void DrawScoreboard() {
+    stroke(255, 255, 0);
+    strokeWeight(5);
+    line(0, 100, 800, 100);
+    line(0, 898, 800, 898);
+
+    textSize(50);
+    fill(255, 0, 0);
+    text(player1Score, 30, 40); 
+    text(player2Score, 640, 40); 
+    String timeMsg = "Timer: "+gameTime;
+    text(timeMsg, 250, 50);
+
+    //score 
+    //if (randBonus1 > -1) {
+    //  text("BONUS", 30, 90);
+    //} else {
+    //  text(player1Coins, 30, 90);
+    //}
+    //if (randBonus2 > -1) {
+    //  text("BONUS", 610, 90);
+    //} else {
+    //  text(player2Coins, 640, 90);
+    //}
+  }
+
+
   private void drawPlayScreen() {
+    // draw score board and other base screen features
     background(0, 0, 0);
+    // the dispeser
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    fill(0, 0, 0);
+    ellipse(400, 500, 40, 40);
+
+    DrawScoreboard();
+
     for (GameObject obj : allGameObjects) {
       obj.drawObject();
     }
@@ -206,38 +246,38 @@ final class Game
       // update position of all objects
       obj.UpdatePosition();
 
-      //check for collisions
+      //check for collisions //<>//
 
       // check boundary collisions
       if (obj.TopWallCollision()) {
+        // case paddle object
         if (obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) {
-          obj.TopBoundingBoxCollision(GameBoundaries.PLAY_TOP);
-          obj.vY = +1;
+          obj.SetvY(1);
+        } else if (obj.objectType == ObjectType.BALL) {
+          obj.Reverse_vY();
         }
       }
       if (obj.BottomWallCollision()) {
         if (obj.objectType == ObjectType.PLAYER_1 || obj.objectType == ObjectType.PLAYER_2) {
-          obj.BottomBoundingBoxCollision(GameBoundaries.PLAY_BOTTOM);
-          obj.vY = -1; //<>//
+          obj.SetvY(-1);
+        } else if (obj.objectType == ObjectType.BALL) {
+          obj.Reverse_vY();
         }
       }
-
-      // for ball we need to reflect vY
     }
 
     // check for object collisions
 
     // update all other object states
     //obj.UpdateObjectState();
-  
 
 
-  // update all other object states
-  for (GameObject obj : allGameObjects) {
-    obj.UpdateObjectState();
+
+    // update all other object states
+    for (GameObject obj : allGameObjects) {
+      obj.UpdateObjectState();
+    }
+
+    // check for any user inputs
   }
-
-  // check for any user inputs
-}
-
 }

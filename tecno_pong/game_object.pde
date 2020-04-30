@@ -1,4 +1,4 @@
-
+ //<>//
 // all game objects have a bounding box and collision detection based on the bounding box
 // all objects are derived from this
 // since each object is a different shape, the objetc are responsible to update the bounding box every turn
@@ -7,17 +7,17 @@ public abstract class GameObject {
   protected int x1, x2; // bounding box x
   protected int y1, y2; // bounding box y
 
-  protected int x, y; // all objects have a position
+  protected int x, y; // all objects have a position, where this actually is with respect to the bounding box is a derived object implementation
   protected int vX, vY; // all object have some velocity
   protected int maxSpeedX, maxSpeedY; // magnitude, max speed an object can have
 
-  protected String objName;
+  protected String objName; // mainly for logging
   public int objectType;
   boolean markForDelete;
 
   protected int updateInterval = 40; // in ms - this adds a partial delay effect to user controls, should be between 0-300ms
   protected int lastControlTime;
-  protected boolean allowControl;
+  protected boolean allowControl; // if this object can be controlled right now
 
   protected Logger logger;
   private void LogMessage(String msg) {
@@ -26,7 +26,7 @@ public abstract class GameObject {
   }
 
   public GameObject(Logger logger, int x, int y, int vX, int vY, int maxSpeedX, int maxSpeedY, String name, int objectType) {
-    this.logger = logger;
+    this.logger = logger; //<>//
     this.x = x;
     this.y = y;
     this.vX = vX;
@@ -38,23 +38,26 @@ public abstract class GameObject {
     this.markForDelete = false;
     this.lastControlTime = millis();
     this.allowControl = true;
+    UpdateObjectState();
     LogMessage("Object Created");
   }
-  
+
   public abstract void drawObject();
 
   public abstract void UpdateObjectState();
-  
-  
+
+
   public int GetObjectYPosition() {
-   return y; 
+    return y;
   }
-  
-  
+
+
   public void UpdatePosition() {
-   x = x+vX;
-   y = y+vY;
+    x = x+vX;
+    y = y+vY;
   }
+
+  // hit test methods:
 
   // collision detector for all objects
   boolean DetectObjectCollision(GameObject other) {
@@ -69,17 +72,27 @@ public abstract class GameObject {
     return false;
   }
 
-  // checks if we are in a collision state with respect to point X from the left, resest objetc x if needed
-  public abstract void LeftBoundingBoxCollision(int X); 
+  // checks if a given X,Y is inside the current bounding box
+  public abstract boolean IsPointInsideBoundingBox(int X, int Y);
 
-  public abstract void RightBoundingBoxCollision(int X);
-  
-  public abstract void TopBoundingBoxCollision(int Y);
-  
-  public abstract void BottomBoundingBoxCollision(int Y);
-  
+  // checks if left bounding box has moved past test point X
+  // resets object x to place left bounding box at the edge of X
+  public abstract boolean LeftBoundingBoxCollision(int X); 
+
+  // checks if right bounding box has moved past test point X
+  // resets object x to place right bounding box at the edge of X
+  public abstract boolean RightBoundingBoxCollision(int X);
+
+  // checks if top bounding box has moved past test point Y
+  // resets object y to place top bounding box at the edge of Y
+  public abstract boolean TopBoundingBoxCollision(int Y);
+
+  // checks if right bounding box has moved past test point X
+  // resets object x to place right bounding box at the edge of X
+  public abstract boolean BottomBoundingBoxCollision(int Y);
+
   boolean LeftWallCollision() {
-    if (x1 < GameBoundaries.PLAY_LEFT) {
+    if (LeftBoundingBoxCollision(GameBoundaries.PLAY_LEFT)) {
       LogMessage("Collision with Left Boundary");
       // we will also move the object back to the boundary
       return true;
@@ -88,15 +101,15 @@ public abstract class GameObject {
   }
 
   boolean RightWallCollision() {
-    if (x2 > GameBoundaries.PLAY_LEFT) {
-      LogMessage("Collision with Left Boundary");
+    if (RightBoundingBoxCollision(GameBoundaries.PLAY_RIGHT)) {
+      LogMessage("Collision with Right Boundary");
       return true;
     }
     return false;
   }
 
   boolean TopWallCollision() {
-    if (y1 < GameBoundaries.PLAY_TOP) {
+    if (TopBoundingBoxCollision(GameBoundaries.PLAY_TOP)) {
       LogMessage("Collision with Top Boundary");
       return true;
     }
@@ -104,24 +117,29 @@ public abstract class GameObject {
   }
 
   boolean BottomWallCollision() {
-    if (y2 > GameBoundaries.PLAY_BOTTOM) {
+    if (BottomBoundingBoxCollision(GameBoundaries.PLAY_BOTTOM)) {
       LogMessage("Collision with Bottom Boundary");
       return true;
     }
     return false;
   }
-  //
+
+  // marks object for delet if off screen
   boolean IsObjectOffScreen() {
     if (x < GameBoundaries.PLAY_LEFT-50 || x > GameBoundaries.PLAY_RIGHT+50) {
       LogMessage("Off Screen X axis, mark for delete ");
+      markForDelete = true;
       return true;
     }
     if (y < GameBoundaries.PLAY_TOP-50 || y > GameBoundaries.PLAY_BOTTOM +50) {
       LogMessage("Off Screen Y axis, mark for delete ");
+      markForDelete = true;
       return true;
     }
     return false;
   }
+
+  // end hit test methods
 
   public boolean AllowControl() {
     return allowControl;
@@ -135,8 +153,46 @@ public abstract class GameObject {
     allowControl = true;
   }
 
+  public void SetvX(int vX) {
+    if (abs(vX) > maxSpeedX) {
+      if (vX < 0) {
+        this.vX = -maxSpeedX;
+      } else {
+        this.vX = maxSpeedX;
+      }
+    } else {
+      this.vX = vX;
+    }
+
+    lastControlTime = millis();
+    allowControl = false;
+  }
+
+  public void SetvY(int vY) {
+    if (abs(vY) > maxSpeedY) {
+      if (vY < 0) {
+        this.vY = -maxSpeedY;
+      } else {
+        this.vY = maxSpeedY;
+      }
+    } else {
+      this.vY = vY;
+    }
+
+    lastControlTime = millis();
+    allowControl = false;
+  }
+
+  public void Reverse_vY() {
+    this.vY = -1*this.vY;
+  }
+  
+  public void Reverse_vX() {
+    this.vX = -1*this.vX;
+  }
+
   public void Increase_vX() {
-    if (allowControl) { //<>//
+    if (allowControl) {
       if (abs(vX) < maxSpeedX) {
         vX++;
         lastControlTime = millis();

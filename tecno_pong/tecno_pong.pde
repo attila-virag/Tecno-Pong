@@ -92,9 +92,10 @@ void keyReleased() {
 
 void draw() {
 
-  game.drawScreen();
 
   game.UpdateGame();
+  
+  game.drawScreen();
 
   //println(str(millis()));
 }

@@ -2,7 +2,7 @@
 
 final class Player extends GameObject {
 
-  private boolean autoMode = false; // means this player is computer controlled
+  private boolean autoMode = true; // means this player is computer controlled
 
   final int w = 20; // the width of the paddle
   private int l = 200; // the lenght of the paddle, can change during a game
@@ -29,7 +29,7 @@ final class Player extends GameObject {
       allowControl = true;
     }
     // update bounding rect
-    x1 = x;
+   x1 = x;
    x2 = x+w;
    y1 = y;
    y2 = y+l;
@@ -71,10 +71,5 @@ final class Player extends GameObject {
     return false;
   }
   
-  public boolean IsPointInsideBoundingBox(int X, int Y) {
-    if(X > x1 && X < x2 && Y > y1 && Y < y2) {
-     return true; 
-    }
-    return false;
-  }
+
 }

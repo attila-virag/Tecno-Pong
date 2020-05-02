@@ -90,6 +90,26 @@ final class Game
     allGameObjects.add(this.player2);
   }
 
+  private GameObject SpawnBall() {
+    int yMin, yMax, xMin, xMax;
+    yMin = 1;
+    yMax = 7;
+    xMin = 4;
+    xMax = 9;
+
+    int vX = int(random(xMin, xMax));
+    int vY = int(random(yMin, yMax));
+    float xDirection = random(0, 1);
+    float yDirection = random(0, 1);
+    if (xDirection < 0.50) {
+      vX =vX*-1;
+    }
+    if (yDirection < 0.50) {
+      vY = vY*-1;
+    }
+    return new Ball(this.logger, 400, 500, vX, vY, 10, 10, "Ball");
+  }
+
   // paused
   public void Pause() {
     SetState(GameState.PAUSE);
@@ -226,7 +246,7 @@ final class Game
       case (GameState.END_SCREEN) : 
       //updateEndScreen(); 
       break;
-    default : 
+    default :  //<>//
       println("Error: invalid gamestate");
     }
     // first move all obe
@@ -241,12 +261,37 @@ final class Game
   private void updatePlayState() {
     // delete any object marked for delete first
 
+    for (int i = allGameObjects.size()-1; i >= 0; i--) {
+      GameObject obj = allGameObjects.get(i);
+      if (obj.markForDelete) {
+        obj.LogMessage("Object was removed");
+        allGameObjects.remove(i);
+      }
+    }
+
+    // keep track of balls in play
+    int ballsInPlay = 0;
+    // keep track of coins in play
+    int coinsInPlay = 0;
+
     // update position of all objects
     for (GameObject obj : allGameObjects) {
+      if (obj.objectType == ObjectType.BALL) {
+        ballsInPlay++;
+      }
+      if (obj.objectType == ObjectType.COIN) {
+        coinsInPlay++;
+      }
       // update position of all objects
       obj.UpdatePosition();
 
-      //check for collisions //<>//
+      // check if object has left the screen, object will be marked for delete
+      if (obj.IsObjectOffScreen()) {
+        // if the object is a ball we can record a score here
+        continue;
+      }
+
+      //check for collisions
 
       // check boundary collisions
       if (obj.TopWallCollision()) {
@@ -264,13 +309,51 @@ final class Game
           obj.Reverse_vY();
         }
       }
+
+      // do special collision detection in case of ball
+      if (obj.objectType == ObjectType.BALL) {
+        if (obj.vX < 0) { // object is moving left
+          if (player1.y1 < obj.y2 && player1.y2 > obj.y1) { // obj and paddle could collide
+            if (player1.x1 < obj.x) { // ball did not move past the paddle yet
+              if (obj.LeftBoundingBoxCollision(player1.x2)) { // collision
+                obj.LogMessage("Collision with player 1");
+                obj.Reverse_vX();
+              }
+            }
+          } else if (player1.autoMode) { // stear the paddle toward the ball
+            // accelerate paddle up
+            if (player1.y1 > obj.y2) {
+              player1.Decrease_vY();
+            } else if (player1.y2 < obj.y1) {
+              player1.Increase_vY();
+            }
+          }
+        } else if (obj.vX > 0) { // obj is moving right
+          if (player2.y1 < obj.y2 && player2.y2 > obj.y1) {
+            if (player2.x2 > obj.x) {
+              if (obj.RightBoundingBoxCollision(player2.x1)) {
+                obj.LogMessage("Collision with player 2");
+                obj.Reverse_vX();
+              }
+            }
+          } else if (player2.autoMode) {
+             // accelerate paddle up
+            if (player2.y1 > obj.y2) {
+              player2.Decrease_vY();
+            } else if (player2.y2 < obj.y1) {
+              player2.Increase_vY();
+            }
+          }
+        }
+      }
     }
 
     // check for object collisions
 
-    // update all other object states
-    //obj.UpdateObjectState();
-
+    // spawn new objects as needed
+    if (ballsInPlay < 1) {
+      allGameObjects.add(SpawnBall());
+    }
 
 
     // update all other object states

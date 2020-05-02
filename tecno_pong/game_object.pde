@@ -15,12 +15,12 @@ public abstract class GameObject {
   public int objectType;
   boolean markForDelete;
 
-  protected int updateInterval = 40; // in ms - this adds a partial delay effect to user controls, should be between 0-300ms
+  protected int updateInterval = 20; // in ms - this adds a partial delay effect to user controls, should be between 0-300ms
   protected int lastControlTime;
   protected boolean allowControl; // if this object can be controlled right now
 
   protected Logger logger;
-  private void LogMessage(String msg) {
+  public void LogMessage(String msg) {
     String message =  objName+">>" + msg;
     logger.LogMessage(message);
   }
@@ -73,7 +73,12 @@ public abstract class GameObject {
   }
 
   // checks if a given X,Y is inside the current bounding box
-  public abstract boolean IsPointInsideBoundingBox(int X, int Y);
+  public boolean IsPointInsideBoundingBox(int X, int Y) {
+    if (X > x1 && X < x2 && Y > y1 && Y < y2) {
+      return true;
+    }
+    return false;
+  }
 
   // checks if left bounding box has moved past test point X
   // resets object x to place left bounding box at the edge of X
@@ -186,7 +191,7 @@ public abstract class GameObject {
   public void Reverse_vY() {
     this.vY = -1*this.vY;
   }
-  
+
   public void Reverse_vX() {
     this.vX = -1*this.vX;
   }
